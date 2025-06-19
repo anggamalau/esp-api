@@ -569,7 +569,8 @@ const docTemplate = `{
             "required": [
                 "email",
                 "name",
-                "password"
+                "password",
+                "role"
             ],
             "properties": {
                 "email": {
@@ -586,6 +587,15 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 6,
                     "example": "password123"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "user",
+                        "moderator"
+                    ],
+                    "example": "user"
                 }
             }
         },
@@ -625,6 +635,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "John Doe"
                 },
+                "role": {
+                    "type": "string",
+                    "example": "user"
+                },
                 "updated_at": {
                     "type": "string",
                     "example": "2024-01-01T00:00:00Z"
@@ -643,6 +657,15 @@ const docTemplate = `{
                     "maxLength": 50,
                     "minLength": 2,
                     "example": "Jane Doe"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "user",
+                        "moderator"
+                    ],
+                    "example": "user"
                 }
             }
         }

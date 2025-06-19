@@ -111,10 +111,18 @@ definitions:
         example: password123
         minLength: 6
         type: string
+      role:
+        example: user
+        enum:
+        - admin
+        - user
+        - moderator
+        type: string
     required:
     - email
     - name
     - password
+    - role
     type: object
   models.UserLoginRequest:
     properties:
@@ -142,6 +150,9 @@ definitions:
       name:
         example: John Doe
         type: string
+      role:
+        example: user
+        type: string
       updated_at:
         example: "2024-01-01T00:00:00Z"
         type: string
@@ -155,6 +166,13 @@ definitions:
         example: Jane Doe
         maxLength: 50
         minLength: 2
+        type: string
+      role:
+        example: user
+        enum:
+        - admin
+        - user
+        - moderator
         type: string
     type: object
 host: localhost:3000

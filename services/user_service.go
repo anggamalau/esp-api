@@ -45,6 +45,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.UserCreateRequ
 		Name:      req.Name,
 		Email:     req.Email,
 		Password:  hashedPassword,
+		Role:      req.Role,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -91,6 +92,9 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, req *models
 			return nil, err
 		}
 		user.Email = req.Email
+	}
+	if req.Role != "" {
+		user.Role = req.Role
 	}
 
 	// Update user
