@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"backend/config"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,7 +15,7 @@ var DB *mongo.Database
 
 func ConnectMongoDB() {
 	clientOptions := options.Client().ApplyURI(config.AppConfig.MongoDBURI)
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -32,7 +33,7 @@ func ConnectMongoDB() {
 	log.Println("Successfully connected to MongoDB")
 
 	// Set the database
-	DB = client.Database("backend_db")
+	DB = client.Database("esp_backend_db")
 
 	// Create indexes
 	createIndexes()
@@ -48,7 +49,7 @@ func createIndexes() {
 		Keys:    map[string]interface{}{"email": 1},
 		Options: options.Index().SetUnique(true),
 	}
-	
+
 	_, err := userCollection.Indexes().CreateOne(ctx, emailIndex)
 	if err != nil {
 		log.Println("Warning: Failed to create email index:", err)
@@ -59,7 +60,7 @@ func createIndexes() {
 	tokenIndex := mongo.IndexModel{
 		Keys: map[string]interface{}{"token": 1},
 	}
-	
+
 	_, err = tokenCollection.Indexes().CreateOne(ctx, tokenIndex)
 	if err != nil {
 		log.Println("Warning: Failed to create token index:", err)
@@ -70,11 +71,11 @@ func createIndexes() {
 		Keys:    map[string]interface{}{"expires_at": 1},
 		Options: options.Index().SetExpireAfterSeconds(0),
 	}
-	
+
 	_, err = tokenCollection.Indexes().CreateOne(ctx, expiryIndex)
 	if err != nil {
 		log.Println("Warning: Failed to create TTL index:", err)
 	}
 
 	log.Println("Database indexes created successfully")
-} 
+}

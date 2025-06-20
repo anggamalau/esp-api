@@ -10,7 +10,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: backend_db
+      MONGO_INITDB_DATABASE: esp_backend_db
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -23,7 +23,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/backend_db?authSource=admin
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/esp_backend_db?authSource=admin
     depends_on:
       - mongodb
     networks:

@@ -45,7 +45,7 @@ func LoadConfig() {
 	AppConfig = &Config{
 		Port:             getEnv("PORT", "3000"),
 		Host:             getEnv("HOST", "localhost"),
-		MongoDBURI:       getEnv("MONGODB_URI", "mongodb://localhost:27017/backend_db"),
+		MongoDBURI:       getEnv("MONGODB_URI", "mongodb://localhost:27017/esp_backend_db"),
 		JWTAccessSecret:  getEnv("JWT_ACCESS_SECRET", "your-access-secret"),
 		JWTRefreshSecret: getEnv("JWT_REFRESH_SECRET", "your-refresh-secret"),
 		JWTAccessExpiry:  getEnv("JWT_ACCESS_EXPIRY", "15m"),

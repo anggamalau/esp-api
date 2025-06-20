@@ -209,7 +209,7 @@ Environment variables in `.env`:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PORT` | Server port | `3000` |
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/backend_db` |
+| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/esp_backend_db` |
 | `JWT_ACCESS_SECRET` | JWT access token secret | - |
 | `JWT_REFRESH_SECRET` | JWT refresh token secret | - |
 | `JWT_ACCESS_EXPIRY` | Access token expiry | `15m` |
