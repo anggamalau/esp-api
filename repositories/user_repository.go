@@ -144,27 +144,83 @@ func (r *userRepository) GetPendingUsers(ctx context.Context) ([]*models.User, e
 func (r *userRepository) VerifyUser(ctx context.Context, userID, adminID string, notes string) error {
 	userObjectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return utils.ErrUserNotFound
+		return err
 	}
 
 	adminObjectID, err := primitive.ObjectIDFromHex(adminID)
 	if err != nil {
-		return utils.ErrUserNotFound
+		return err
 	}
 
 	now := time.Now()
-	filter := bson.M{"_id": userObjectID}
 	update := bson.M{
 		"$set": bson.M{
 			"is_verified":        true,
-			"verified_at":        now,
-			"verified_by":        adminObjectID,
+			"verified_at":        &now,
+			"verified_by":        &adminObjectID,
 			"verification_notes": notes,
 			"updated_at":         now,
 		},
 	}
 
-	result, err := r.collection.UpdateOne(ctx, filter, update)
+	result, err := r.collection.UpdateOne(ctx, bson.M{"_id": userObjectID}, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return utils.ErrUserNotFound
+	}
+
+	return nil
+}
+
+// UpdatePassword updates only the user's password
+func (r *userRepository) UpdatePassword(ctx context.Context, userID, hashedPassword string) error {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	update := bson.M{
+		"$set": bson.M{
+			"password":   hashedPassword,
+			"updated_at": now,
+		},
+	}
+
+	result, err := r.collection.UpdateOne(ctx, bson.M{"_id": userObjectID}, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return utils.ErrUserNotFound
+	}
+
+	return nil
+}
+
+// UpdatePasswordResetInfo updates password reset tracking information
+func (r *userRepository) UpdatePasswordResetInfo(ctx context.Context, userID string) error {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	update := bson.M{
+		"$set": bson.M{
+			"last_password_reset": &now,
+			"updated_at":          now,
+		},
+		"$inc": bson.M{
+			"password_reset_count": 1,
+		},
+	}
+
+	result, err := r.collection.UpdateOne(ctx, bson.M{"_id": userObjectID}, update)
 	if err != nil {
 		return err
 	}

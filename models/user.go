@@ -7,17 +7,19 @@ import (
 )
 
 type User struct {
-	ID                primitive.ObjectID  `json:"id" bson:"_id,omitempty"`
-	Name              string              `json:"name" bson:"name" validate:"required,min=2,max=50"`
-	Email             string              `json:"email" bson:"email" validate:"required,email"`
-	Password          string              `json:"-" bson:"password" validate:"required,min=6"`
-	Role              string              `json:"role" bson:"role" validate:"required,oneof=admin liaison voice finance"`
-	IsVerified        bool                `json:"is_verified" bson:"is_verified"`
-	VerifiedAt        *time.Time          `json:"verified_at,omitempty" bson:"verified_at,omitempty"`
-	VerifiedBy        *primitive.ObjectID `json:"verified_by,omitempty" bson:"verified_by,omitempty"`
-	VerificationNotes string              `json:"verification_notes,omitempty" bson:"verification_notes,omitempty"`
-	CreatedAt         time.Time           `json:"created_at" bson:"created_at"`
-	UpdatedAt         time.Time           `json:"updated_at" bson:"updated_at"`
+	ID                 primitive.ObjectID  `json:"id" bson:"_id,omitempty"`
+	Name               string              `json:"name" bson:"name" validate:"required,min=2,max=50"`
+	Email              string              `json:"email" bson:"email" validate:"required,email"`
+	Password           string              `json:"-" bson:"password" validate:"required,min=6"`
+	Role               string              `json:"role" bson:"role" validate:"required,oneof=admin liaison voice finance"`
+	IsVerified         bool                `json:"is_verified" bson:"is_verified"`
+	VerifiedAt         *time.Time          `json:"verified_at,omitempty" bson:"verified_at,omitempty"`
+	VerifiedBy         *primitive.ObjectID `json:"verified_by,omitempty" bson:"verified_by,omitempty"`
+	VerificationNotes  string              `json:"verification_notes,omitempty" bson:"verification_notes,omitempty"`
+	LastPasswordReset  *time.Time          `json:"last_password_reset,omitempty" bson:"last_password_reset,omitempty"`
+	PasswordResetCount int                 `json:"password_reset_count" bson:"password_reset_count"`
+	CreatedAt          time.Time           `json:"created_at" bson:"created_at"`
+	UpdatedAt          time.Time           `json:"updated_at" bson:"updated_at"`
 }
 
 type UserCreateRequest struct {
@@ -66,6 +68,14 @@ type PendingUserResponse struct {
 type RegisterPendingResponse struct {
 	Message string       `json:"message" example:"Registration successful. Your account is pending admin verification."`
 	User    UserResponse `json:"user"`
+}
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"required,email" example:"john@example.com"`
+}
+
+type ForgotPasswordResponse struct {
+	Message string `json:"message" example:"New password has been sent to your email address"`
 }
 
 func (u *User) ToResponse() UserResponse {

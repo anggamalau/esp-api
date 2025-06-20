@@ -19,6 +19,16 @@ type Config struct {
 	BcryptRounds     int
 	AppEnv           string
 
+	// SendGrid Email Configuration
+	SendGridAPIKey       string
+	SendGridFromEmail    string
+	SendGridFromName     string
+	ResetPasswordSubject string
+
+	// Password Reset Configuration
+	PasswordResetLength   int
+	PasswordResetAttempts int
+
 	// Swagger Configuration
 	SwaggerEnabled  bool
 	SwaggerHost     string
@@ -53,6 +63,16 @@ func LoadConfig() {
 		BcryptRounds:     bcryptRounds,
 		AppEnv:           getEnv("APP_ENV", "development"),
 
+		// SendGrid Email Configuration
+		SendGridAPIKey:       getEnv("SENDGRID_API_KEY", ""),
+		SendGridFromEmail:    getEnv("SENDGRID_FROM_EMAIL", ""),
+		SendGridFromName:     getEnv("SENDGRID_FROM_NAME", ""),
+		ResetPasswordSubject: getEnv("RESET_PASSWORD_SUBJECT", "Reset Password"),
+
+		// Password Reset Configuration
+		PasswordResetLength:   getEnvInt("PASSWORD_RESET_LENGTH", 10),
+		PasswordResetAttempts: getEnvInt("PASSWORD_RESET_ATTEMPTS", 3),
+
 		// Swagger Configuration
 		SwaggerEnabled:  getEnvBool("SWAGGER_ENABLED", true),
 		SwaggerHost:     getEnv("SWAGGER_HOST", "localhost:3000"),
@@ -78,6 +98,16 @@ func getEnvBool(key string, defaultValue bool) bool {
 			return true
 		case "false", "0", "no", "off":
 			return false
+		}
+	}
+	return defaultValue
+}
+
+func getEnvInt(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		intValue, err := strconv.Atoi(value)
+		if err == nil {
+			return intValue
 		}
 	}
 	return defaultValue

@@ -54,8 +54,9 @@ func main() {
 	tokenRepo := repositories.NewTokenRepository()
 
 	// Initialize services
+	emailService := services.NewEmailService()
 	userService := services.NewUserService(userRepo)
-	authService := services.NewAuthService(userRepo, tokenRepo)
+	authService := services.NewAuthService(userRepo, tokenRepo, emailService)
 	adminService := services.NewAdminService(userRepo)
 
 	// Initialize handlers

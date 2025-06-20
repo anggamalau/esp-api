@@ -1,5 +1,19 @@
 basePath: /api/v1
 definitions:
+  models.ForgotPasswordRequest:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+    required:
+    - email
+    type: object
+  models.ForgotPasswordResponse:
+    properties:
+      message:
+        example: New password has been sent to your email address
+        type: string
+    type: object
   models.LoginResponse:
     properties:
       tokens:
@@ -55,6 +69,17 @@ definitions:
       success:
         example: false
         type: boolean
+    type: object
+  models.SwaggerForgotPasswordResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.ForgotPasswordResponse'
+      message:
+        example: Request processed successfully
+        type: string
+      status:
+        example: success
+        type: string
     type: object
   models.SwaggerLoginResponse:
     properties:
@@ -117,15 +142,12 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.TokenPair'
-      error:
-        example: ""
-        type: string
       message:
         example: Token refreshed successfully
         type: string
-      success:
-        example: true
-        type: boolean
+      status:
+        example: success
+        type: string
     type: object
   models.SwaggerUserResponse:
     properties:
@@ -385,6 +407,40 @@ paths:
       summary: Get pending users
       tags:
       - Admin
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Generate a new password and send it to user's email
+      parameters:
+      - description: Email address for password reset
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerForgotPasswordResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      summary: Reset user password
+      tags:
+      - Authentication
   /auth/login:
     post:
       consumes:

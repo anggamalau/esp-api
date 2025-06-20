@@ -186,3 +186,45 @@ func (h *AuthHandler) LogoutAll(c *fiber.Ctx) error {
 
 	return utils.SuccessResponse(c, fiber.StatusOK, "Logged out from all devices successfully", nil)
 }
+
+// ForgotPassword godoc
+// @Summary      Reset user password
+// @Description  Generate a new password and send it to user's email
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.ForgotPasswordRequest  true  "Email address for password reset"
+// @Success      200      {object}  models.SwaggerForgotPasswordResponse
+// @Failure      400      {object}  models.SwaggerErrorResponse
+// @Failure      429      {object}  models.SwaggerErrorResponse
+// @Failure      500      {object}  models.SwaggerErrorResponse
+// @Router       /auth/forgot-password [post]
+func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
+	var req models.ForgotPasswordRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	response, err := h.authService.ForgotPassword(ctx, &req)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return utils.ValidationErrorResponse(c, err)
+		}
+		if err == utils.ErrUserNotEligibleForReset {
+			return utils.ErrorResponse(c, fiber.StatusBadRequest, "Account not eligible for password reset")
+		}
+		if err == utils.ErrPasswordResetLimitExceeded {
+			return utils.ErrorResponse(c, fiber.StatusTooManyRequests, "Too many password reset attempts. Please try again later.")
+		}
+		if err == utils.ErrEmailDeliveryFailed {
+			return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to send reset email. Please try again later.")
+		}
+		return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to process password reset request", err.Error())
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "Password reset processed successfully", response)
+}

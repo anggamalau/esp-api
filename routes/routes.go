@@ -45,6 +45,7 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler, userHandler 
 	auth.Post("/login", authHandler.Login)
 	auth.Post("/refresh", authHandler.RefreshToken)
 	auth.Post("/logout", authHandler.Logout)
+	auth.Post("/forgot-password", authHandler.ForgotPassword)
 
 	// Protected routes
 	protected := api.Group("/users", middleware.AuthMiddleware())

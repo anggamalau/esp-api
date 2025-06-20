@@ -11,14 +11,16 @@ import (
 )
 
 type AuthService struct {
-	userRepo  interfaces.UserRepository
-	tokenRepo interfaces.TokenRepository
+	userRepo     interfaces.UserRepository
+	tokenRepo    interfaces.TokenRepository
+	emailService *EmailService
 }
 
-func NewAuthService(userRepo interfaces.UserRepository, tokenRepo interfaces.TokenRepository) *AuthService {
+func NewAuthService(userRepo interfaces.UserRepository, tokenRepo interfaces.TokenRepository, emailService *EmailService) *AuthService {
 	return &AuthService{
-		userRepo:  userRepo,
-		tokenRepo: tokenRepo,
+		userRepo:     userRepo,
+		tokenRepo:    tokenRepo,
+		emailService: emailService,
 	}
 }
 
@@ -187,4 +189,89 @@ func (s *AuthService) generateTokenPair(ctx context.Context, user *models.User) 
 
 func (s *AuthService) CleanupExpiredTokens(ctx context.Context) error {
 	return s.tokenRepo.DeleteExpiredTokens(ctx)
+}
+
+// ForgotPassword generates a new password and sends it via email
+func (s *AuthService) ForgotPassword(ctx context.Context, req *models.ForgotPasswordRequest) (*models.ForgotPasswordResponse, error) {
+	// Validate input
+	if err := utils.ValidateStruct(req); err != nil {
+		return nil, err
+	}
+
+	// Get user by email
+	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	if err != nil {
+		if err == utils.ErrUserNotFound {
+			// For security reasons, don't reveal if email exists or not
+			return &models.ForgotPasswordResponse{
+				Message: "If the email address exists in our system, a new password has been sent.",
+			}, nil
+		}
+		return nil, err
+	}
+
+	// Check if user is verified
+	if !user.IsVerified {
+		return nil, utils.ErrUserNotEligibleForReset
+	}
+
+	// Check rate limiting
+	if err := s.checkPasswordResetRateLimit(user); err != nil {
+		return nil, err
+	}
+
+	// Generate new secure password
+	newPassword, err := utils.GenerateSecurePassword(config.AppConfig.PasswordResetLength)
+	if err != nil {
+		return nil, utils.ErrPasswordGenerationFailed
+	}
+
+	// Hash the new password
+	hashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update user's password in database
+	if err := s.userRepo.UpdatePassword(ctx, user.ID.Hex(), hashedPassword); err != nil {
+		return nil, err
+	}
+
+	// Update password reset tracking
+	if err := s.userRepo.UpdatePasswordResetInfo(ctx, user.ID.Hex()); err != nil {
+		// Log error but don't fail the request
+		// The password has already been updated successfully
+	}
+
+	// Send email with new password
+	if err := s.emailService.SendPasswordResetEmail(user.Email, user.Name, newPassword); err != nil {
+		// Log the error but still return success to user for security
+		// In production, you might want to queue this for retry
+		return nil, utils.ErrEmailDeliveryFailed
+	}
+
+	// Revoke all existing tokens for security
+	_ = s.tokenRepo.RevokeAllUserTokens(ctx, user.ID.Hex())
+
+	return &models.ForgotPasswordResponse{
+		Message: "A new password has been sent to your email address.",
+	}, nil
+}
+
+// checkPasswordResetRateLimit checks if user has exceeded password reset attempts
+func (s *AuthService) checkPasswordResetRateLimit(user *models.User) error {
+	maxAttempts := config.AppConfig.PasswordResetAttempts
+	if maxAttempts <= 0 {
+		return nil // Rate limiting disabled
+	}
+
+	// Check if user has exceeded attempts within the last hour
+	if user.LastPasswordReset != nil {
+		oneHourAgo := time.Now().Add(-1 * time.Hour)
+		if user.LastPasswordReset.After(oneHourAgo) && user.PasswordResetCount >= maxAttempts {
+			return utils.ErrPasswordResetLimitExceeded
+		}
+	}
+
+	return nil
 }

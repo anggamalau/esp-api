@@ -12,6 +12,7 @@ A robust backend service built with Go Fiber framework, featuring MongoDB integr
 - **CORS** and security middleware
 - **Docker** support for easy deployment
 - **Refresh Token Rotation** for enhanced security
+- **Password Reset via Email** with SendGrid integration
 - **Swagger Documentation** with runtime enable/disable control
 - **Environment-based Configuration** for development and production
 
@@ -160,6 +161,17 @@ Content-Type: application/json
 }
 ```
 
+#### Forgot Password
+```http
+POST /auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "john@example.com"
+}
+```
+*Generates a new secure password and sends it via email using SendGrid*
+
 ### Protected User Endpoints
 *Requires Authorization header: `Bearer <access_token>`*
 
@@ -201,6 +213,7 @@ Authorization: Bearer <access_token>
 4. **Token Rotation** → New refresh token provided on each refresh
 5. **Logout** → Revoke specific refresh token
 6. **Logout All** → Revoke all user's refresh tokens
+7. **Password Reset** → Generate new password and send via email
 
 ## 🔧 Configuration
 
@@ -215,6 +228,12 @@ Environment variables in `.env`:
 | `JWT_ACCESS_EXPIRY` | Access token expiry | `15m` |
 | `JWT_REFRESH_EXPIRY` | Refresh token expiry | `168h` |
 | `BCRYPT_ROUNDS` | Password hashing rounds | `12` |
+| `SENDGRID_API_KEY` | SendGrid API key for email sending | - |
+| `SENDGRID_FROM_EMAIL` | From email address for notifications | - |
+| `SENDGRID_FROM_NAME` | From name for notifications | - |
+| `RESET_PASSWORD_SUBJECT` | Subject line for password reset emails | `Password Reset - Your Account` |
+| `PASSWORD_RESET_LENGTH` | Length of generated passwords | `10` |
+| `PASSWORD_RESET_ATTEMPTS` | Max password reset attempts per hour | `3` |
 | `SWAGGER_ENABLED` | Enable/disable Swagger UI | `true` (dev), `false` (prod) |
 | `SWAGGER_HOST` | Swagger host for documentation | `localhost:3000` |
 | `SWAGGER_BASE_PATH` | API base path | `/api/v1` |
@@ -284,6 +303,11 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 curl -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
+
+# Forgot Password
+curl -X POST http://localhost:3000/api/v1/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com"}'
 
 # Get Profile (replace TOKEN with actual access token)
 curl -X GET http://localhost:3000/api/v1/users/profile \

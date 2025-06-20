@@ -34,10 +34,9 @@ type SwaggerUserResponse struct {
 
 // SwaggerTokenResponse represents token refresh response for Swagger documentation
 type SwaggerTokenResponse struct {
-	Success bool      `json:"success" example:"true"`
+	Status  string    `json:"status" example:"success"`
 	Message string    `json:"message" example:"Token refreshed successfully"`
 	Data    TokenPair `json:"data"`
-	Error   string    `json:"error,omitempty" example:""`
 }
 
 // SwaggerHealthResponse represents health check response for Swagger documentation
@@ -74,4 +73,10 @@ type SwaggerPendingUsersResponse struct {
 	Message string                `json:"message" example:"Pending users retrieved successfully"`
 	Data    []PendingUserResponse `json:"data"`
 	Error   string                `json:"error,omitempty" example:""`
+}
+
+type SwaggerForgotPasswordResponse struct {
+	Status  string                 `json:"status" example:"success"`
+	Message string                 `json:"message" example:"Request processed successfully"`
+	Data    ForgotPasswordResponse `json:"data"`
 }

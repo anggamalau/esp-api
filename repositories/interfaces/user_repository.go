@@ -13,4 +13,6 @@ type UserRepository interface {
 	Delete(ctx context.Context, id string) error
 	GetPendingUsers(ctx context.Context) ([]*models.User, error)
 	VerifyUser(ctx context.Context, userID, adminID string, notes string) error
+	UpdatePassword(ctx context.Context, userID, hashedPassword string) error
+	UpdatePasswordResetInfo(ctx context.Context, userID string) error
 }
