@@ -59,3 +59,19 @@ type SwaggerValidationErrorResponse struct {
 	Data    string                   `json:"data" example:"null"`
 	Error   []SwaggerValidationError `json:"error"`
 }
+
+// SwaggerRegisterPendingResponse represents registration pending response for Swagger documentation
+type SwaggerRegisterPendingResponse struct {
+	Success bool                    `json:"success" example:"true"`
+	Message string                  `json:"message" example:"Registration successful. Your account is pending admin verification."`
+	Data    RegisterPendingResponse `json:"data"`
+	Error   string                  `json:"error,omitempty" example:""`
+}
+
+// SwaggerPendingUsersResponse represents pending users list response for Swagger documentation
+type SwaggerPendingUsersResponse struct {
+	Success bool                  `json:"success" example:"true"`
+	Message string                `json:"message" example:"Pending users retrieved successfully"`
+	Data    []PendingUserResponse `json:"data"`
+	Error   string                `json:"error,omitempty" example:""`
+}

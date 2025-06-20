@@ -56,10 +56,12 @@ func main() {
 	// Initialize services
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService(userRepo, tokenRepo)
+	adminService := services.NewAdminService(userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
+	adminHandler := handlers.NewAdminHandler(adminService)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
@@ -73,7 +75,7 @@ func main() {
 	})
 
 	// Setup routes
-	routes.SetupRoutes(app, authHandler, userHandler)
+	routes.SetupRoutes(app, authHandler, userHandler, adminHandler, userRepo)
 
 	// Log Swagger status
 	logSwaggerStatus()

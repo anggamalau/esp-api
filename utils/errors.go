@@ -5,14 +5,17 @@ import (
 )
 
 var (
-	ErrUserNotFound       = errors.New("user not found")
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrTokenNotFound      = errors.New("token not found")
-	ErrTokenExpired       = errors.New("token expired")
-	ErrTokenRevoked       = errors.New("token revoked")
-	ErrUserAlreadyExists  = errors.New("user already exists")
-	ErrInvalidToken       = errors.New("invalid token")
-	ErrUnauthorized       = errors.New("unauthorized")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrTokenNotFound       = errors.New("token not found")
+	ErrTokenExpired        = errors.New("token expired")
+	ErrTokenRevoked        = errors.New("token revoked")
+	ErrUserAlreadyExists   = errors.New("user already exists")
+	ErrInvalidToken        = errors.New("invalid token")
+	ErrUnauthorized        = errors.New("unauthorized")
+	ErrUserNotVerified     = errors.New("user account not verified by admin")
+	ErrUserAlreadyVerified = errors.New("user already verified")
+	ErrUnauthorizedAdmin   = errors.New("admin access required")
 )
 
 func IsValidationError(err error) bool {

@@ -3,11 +3,12 @@ package routes
 import (
 	"backend/handlers"
 	"backend/middleware"
+	"backend/repositories/interfaces"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler) {
+func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, adminHandler *handlers.AdminHandler, userRepo interfaces.UserRepository) {
 	// Middleware
 	app.Use(middleware.LoggerMiddleware())
 	app.Use(middleware.CorsMiddleware())
@@ -51,4 +52,10 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler, userHandler 
 	protected.Put("/profile", userHandler.UpdateProfile)
 	protected.Delete("/profile", userHandler.DeleteProfile)
 	protected.Post("/logout-all", authHandler.LogoutAll)
+
+	// Admin-only routes
+	admin := api.Group("/admin", middleware.AuthMiddleware(), middleware.AdminMiddleware(userRepo))
+	admin.Get("/users/pending", adminHandler.GetPendingUsers)
+	admin.Post("/users/:id/verify", adminHandler.VerifyUser)
+	admin.Get("/users/:id", adminHandler.GetUserDetails)
 }

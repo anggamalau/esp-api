@@ -40,4 +40,5 @@ Thumbs.db
 /dist
 
 # Docker
-.dockerignore 
+.dockerignore backend
+*.log

@@ -22,7 +22,7 @@ func NewAuthService(userRepo interfaces.UserRepository, tokenRepo interfaces.Tok
 	}
 }
 
-func (s *AuthService) Register(ctx context.Context, req *models.UserCreateRequest) (*models.LoginResponse, error) {
+func (s *AuthService) Register(ctx context.Context, req *models.UserCreateRequest) (*models.RegisterPendingResponse, error) {
 	// Validate input
 	if err := utils.ValidateStruct(req); err != nil {
 		return nil, err
@@ -43,14 +43,15 @@ func (s *AuthService) Register(ctx context.Context, req *models.UserCreateReques
 		return nil, err
 	}
 
-	// Create user
+	// Create user with verification disabled by default
 	user := &models.User{
-		Name:      req.Name,
-		Email:     req.Email,
-		Password:  hashedPassword,
-		Role:      req.Role,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Name:       req.Name,
+		Email:      req.Email,
+		Password:   hashedPassword,
+		Role:       req.Role,
+		IsVerified: false, // New users need admin verification
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 
 	err = s.userRepo.Create(ctx, user)
@@ -58,15 +59,10 @@ func (s *AuthService) Register(ctx context.Context, req *models.UserCreateReques
 		return nil, err
 	}
 
-	// Generate tokens
-	tokens, err := s.generateTokenPair(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-
-	return &models.LoginResponse{
-		User:   user.ToResponse(),
-		Tokens: *tokens,
+	// Return pending response (no tokens for unverified users)
+	return &models.RegisterPendingResponse{
+		Message: "Registration successful. Your account is pending admin verification.",
+		User:    user.ToResponse(),
 	}, nil
 }
 
@@ -88,6 +84,11 @@ func (s *AuthService) Login(ctx context.Context, req *models.UserLoginRequest) (
 	// Check password
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		return nil, utils.ErrInvalidCredentials
+	}
+
+	// Check if user is verified
+	if !user.IsVerified {
+		return nil, utils.ErrUserNotVerified
 	}
 
 	// Generate tokens

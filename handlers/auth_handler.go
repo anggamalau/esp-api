@@ -28,7 +28,7 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 // @Accept       json
 // @Produce      json
 // @Param        request  body      models.UserCreateRequest  true  "User registration data"
-// @Success      201      {object}  models.SwaggerLoginResponse
+// @Success      201      {object}  models.SwaggerRegisterPendingResponse
 // @Failure      400      {object}  models.SwaggerErrorResponse
 // @Failure      409      {object}  models.SwaggerErrorResponse
 // @Failure      500      {object}  models.SwaggerErrorResponse
@@ -54,7 +54,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to register user", err.Error())
 	}
 
-	return utils.SuccessResponse(c, fiber.StatusCreated, "User registered successfully", response)
+	return utils.SuccessResponse(c, fiber.StatusCreated, response.Message, response)
 }
 
 // Login godoc
@@ -67,6 +67,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 // @Success      200      {object}  models.SwaggerLoginResponse
 // @Failure      400      {object}  models.SwaggerErrorResponse
 // @Failure      401      {object}  models.SwaggerErrorResponse
+// @Failure      403      {object}  models.SwaggerErrorResponse
 // @Failure      500      {object}  models.SwaggerErrorResponse
 // @Router       /auth/login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
@@ -86,6 +87,9 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		}
 		if err == utils.ErrInvalidCredentials {
 			return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Invalid credentials")
+		}
+		if err == utils.ErrUserNotVerified {
+			return utils.ErrorResponse(c, fiber.StatusForbidden, "Account not verified by admin")
 		}
 		return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to login", err.Error())
 	}

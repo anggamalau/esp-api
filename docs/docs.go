@@ -24,6 +24,195 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/users/pending": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get list of users awaiting admin verification",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get pending users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerPendingUsersResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get detailed information about a specific user (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get user details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerUserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{id}/verify": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Verify a user account to allow them to login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Verify user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Verification data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.VerificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticate user with email and password",
@@ -63,6 +252,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/models.SwaggerErrorResponse"
                         }
@@ -202,7 +397,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerLoginResponse"
+                            "$ref": "#/definitions/models.SwaggerRegisterPendingResponse"
                         }
                     },
                     "400": {
@@ -436,6 +631,31 @@ const docTemplate = `{
                 }
             }
         },
+        "models.PendingUserResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439011"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "user"
+                }
+            }
+        },
         "models.RefreshTokenRequest": {
             "type": "object",
             "required": [
@@ -445,6 +665,18 @@ const docTemplate = `{
                 "refresh_token": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "models.RegisterPendingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Registration successful. Your account is pending admin verification."
+                },
+                "user": {
+                    "$ref": "#/definitions/models.UserResponse"
                 }
             }
         },
@@ -482,6 +714,49 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Login successful"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "models.SwaggerPendingUsersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PendingUserResponse"
+                    }
+                },
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Pending users retrieved successfully"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "models.SwaggerRegisterPendingResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.RegisterPendingResponse"
+                },
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Registration successful. Your account is pending admin verification."
                 },
                 "success": {
                     "type": "boolean",
@@ -592,8 +867,9 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "admin",
-                        "user",
-                        "moderator"
+                        "liaison",
+                        "voice",
+                        "finance"
                     ],
                     "example": "user"
                 }
@@ -631,6 +907,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "507f1f77bcf86cd799439011"
                 },
+                "is_verified": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string",
                     "example": "John Doe"
@@ -640,6 +920,14 @@ const docTemplate = `{
                     "example": "user"
                 },
                 "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "verification_notes": {
+                    "type": "string",
+                    "example": "Verified by admin"
+                },
+                "verified_at": {
                     "type": "string",
                     "example": "2024-01-01T00:00:00Z"
                 }
@@ -662,10 +950,21 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "admin",
-                        "user",
-                        "moderator"
+                        "liaison",
+                        "voice",
+                        "finance"
                     ],
                     "example": "user"
+                }
+            }
+        },
+        "models.VerificationRequest": {
+            "type": "object",
+            "properties": {
+                "notes": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "Identity verified through company records"
                 }
             }
         }

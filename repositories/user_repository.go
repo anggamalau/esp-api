@@ -74,10 +74,14 @@ func (r *userRepository) Update(ctx context.Context, user *models.User) error {
 	filter := bson.M{"_id": user.ID}
 	update := bson.M{
 		"$set": bson.M{
-			"name":       user.Name,
-			"email":      user.Email,
-			"role":       user.Role,
-			"updated_at": user.UpdatedAt,
+			"name":               user.Name,
+			"email":              user.Email,
+			"role":               user.Role,
+			"is_verified":        user.IsVerified,
+			"verified_at":        user.VerifiedAt,
+			"verified_by":        user.VerifiedBy,
+			"verification_notes": user.VerificationNotes,
+			"updated_at":         user.UpdatedAt,
 		},
 	}
 
@@ -108,6 +112,64 @@ func (r *userRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	if result.DeletedCount == 0 {
+		return utils.ErrUserNotFound
+	}
+
+	return nil
+}
+
+func (r *userRepository) GetPendingUsers(ctx context.Context) ([]*models.User, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{"is_verified": false})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var users []*models.User
+	for cursor.Next(ctx) {
+		var user models.User
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (r *userRepository) VerifyUser(ctx context.Context, userID, adminID string, notes string) error {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return utils.ErrUserNotFound
+	}
+
+	adminObjectID, err := primitive.ObjectIDFromHex(adminID)
+	if err != nil {
+		return utils.ErrUserNotFound
+	}
+
+	now := time.Now()
+	filter := bson.M{"_id": userObjectID}
+	update := bson.M{
+		"$set": bson.M{
+			"is_verified":        true,
+			"verified_at":        now,
+			"verified_by":        adminObjectID,
+			"verification_notes": notes,
+			"updated_at":         now,
+		},
+	}
+
+	result, err := r.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
 		return utils.ErrUserNotFound
 	}
 

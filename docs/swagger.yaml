@@ -7,6 +7,24 @@ definitions:
       user:
         $ref: '#/definitions/models.UserResponse'
     type: object
+  models.PendingUserResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      email:
+        example: john@example.com
+        type: string
+      id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      name:
+        example: John Doe
+        type: string
+      role:
+        example: user
+        type: string
+    type: object
   models.RefreshTokenRequest:
     properties:
       refresh_token:
@@ -14,6 +32,14 @@ definitions:
         type: string
     required:
     - refresh_token
+    type: object
+  models.RegisterPendingResponse:
+    properties:
+      message:
+        example: Registration successful. Your account is pending admin verification.
+        type: string
+      user:
+        $ref: '#/definitions/models.UserResponse'
     type: object
   models.SwaggerErrorResponse:
     properties:
@@ -39,6 +65,36 @@ definitions:
         type: string
       message:
         example: Login successful
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  models.SwaggerPendingUsersResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.PendingUserResponse'
+        type: array
+      error:
+        example: ""
+        type: string
+      message:
+        example: Pending users retrieved successfully
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  models.SwaggerRegisterPendingResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.RegisterPendingResponse'
+      error:
+        example: ""
+        type: string
+      message:
+        example: Registration successful. Your account is pending admin verification.
         type: string
       success:
         example: true
@@ -112,11 +168,12 @@ definitions:
         minLength: 6
         type: string
       role:
-        example: user
         enum:
         - admin
-        - user
-        - moderator
+        - liaison
+        - voice
+        - finance
+        example: user
         type: string
     required:
     - email
@@ -147,6 +204,9 @@ definitions:
       id:
         example: 507f1f77bcf86cd799439011
         type: string
+      is_verified:
+        example: true
+        type: boolean
       name:
         example: John Doe
         type: string
@@ -154,6 +214,12 @@ definitions:
         example: user
         type: string
       updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      verification_notes:
+        example: Verified by admin
+        type: string
+      verified_at:
         example: "2024-01-01T00:00:00Z"
         type: string
     type: object
@@ -168,11 +234,19 @@ definitions:
         minLength: 2
         type: string
       role:
-        example: user
         enum:
         - admin
-        - user
-        - moderator
+        - liaison
+        - voice
+        - finance
+        example: user
+        type: string
+    type: object
+  models.VerificationRequest:
+    properties:
+      notes:
+        example: Identity verified through company records
+        maxLength: 500
         type: string
     type: object
 host: localhost:3000
@@ -190,6 +264,127 @@ info:
   title: Backend API
   version: "1.0"
 paths:
+  /admin/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerUserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user details
+      tags:
+      - Admin
+  /admin/users/{id}/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify a user account to allow them to login
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Verification data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Verify user
+      tags:
+      - Admin
+  /admin/users/pending:
+    get:
+      consumes:
+      - application/json
+      description: Get list of users awaiting admin verification
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerPendingUsersResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get pending users
+      tags:
+      - Admin
   /auth/login:
     post:
       consumes:
@@ -215,6 +410,10 @@ paths:
             $ref: '#/definitions/models.SwaggerErrorResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/models.SwaggerErrorResponse'
         "500":
@@ -306,7 +505,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.SwaggerLoginResponse'
+            $ref: '#/definitions/models.SwaggerRegisterPendingResponse'
         "400":
           description: Bad Request
           schema:
