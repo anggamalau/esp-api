@@ -725,7 +725,7 @@ const docTemplate = `{
                 },
                 "role": {
                     "type": "string",
-                    "example": "user"
+                    "example": "liaison"
                 }
             }
         },
@@ -956,7 +956,7 @@ const docTemplate = `{
                         "voice",
                         "finance"
                     ],
-                    "example": "user"
+                    "example": "liaison"
                 }
             }
         },
@@ -1002,7 +1002,7 @@ const docTemplate = `{
                 },
                 "role": {
                     "type": "string",
-                    "example": "user"
+                    "example": "liaison"
                 },
                 "updated_at": {
                     "type": "string",
@@ -1039,7 +1039,7 @@ const docTemplate = `{
                         "voice",
                         "finance"
                     ],
-                    "example": "user"
+                    "example": "liaison"
                 }
             }
         },
