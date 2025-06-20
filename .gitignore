@@ -42,3 +42,4 @@ Thumbs.db
 # Docker
 .dockerignore backend
 *.log
+backend
