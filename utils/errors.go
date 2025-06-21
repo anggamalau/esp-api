@@ -20,6 +20,7 @@ var (
 	ErrUserNotEligibleForReset    = errors.New("user not eligible for password reset")
 	ErrPasswordResetLimitExceeded = errors.New("password reset limit exceeded")
 	ErrPasswordGenerationFailed   = errors.New("failed to generate secure password")
+	ErrLastAdminDemotion          = errors.New("cannot demote the last admin user")
 
 	// Menu related errors
 	ErrMenuNotFound            = errors.New("menu not found")

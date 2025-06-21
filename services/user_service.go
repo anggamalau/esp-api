@@ -94,9 +94,6 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, req *models
 		}
 		user.Email = req.Email
 	}
-	if req.Role != "" {
-		user.Role = req.Role
-	}
 
 	// Update user
 	err = s.userRepo.Update(ctx, user)

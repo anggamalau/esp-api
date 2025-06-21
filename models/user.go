@@ -49,7 +49,16 @@ type UserResponse struct {
 type UserUpdateRequest struct {
 	Name  string `json:"name" validate:"omitempty,min=2,max=50" example:"Jane Doe"`
 	Email string `json:"email" validate:"omitempty,email" example:"jane@example.com"`
-	Role  string `json:"role" validate:"omitempty,oneof=admin liaison voice finance" example:"user"`
+}
+
+// Admin role management models
+type AdminUserRoleUpdateRequest struct {
+	Role string `json:"role" validate:"required,oneof=admin liaison voice finance" example:"liaison"`
+}
+
+type AdminUserRoleUpdateResponse struct {
+	Message string       `json:"message" example:"User role updated successfully"`
+	User    UserResponse `json:"user"`
 }
 
 // Admin verification models
