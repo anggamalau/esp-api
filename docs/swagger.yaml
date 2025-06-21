@@ -1,5 +1,26 @@
 basePath: /api/v1
 definitions:
+  models.AdminUserRoleUpdateRequest:
+    properties:
+      role:
+        enum:
+        - admin
+        - liaison
+        - voice
+        - finance
+        example: liaison
+        type: string
+    required:
+    - role
+    type: object
+  models.AdminUserRoleUpdateResponse:
+    properties:
+      message:
+        example: User role updated successfully
+        type: string
+      user:
+        $ref: '#/definitions/models.UserResponse'
+    type: object
   models.ChangePasswordRequest:
     properties:
       confirm_password:
@@ -198,6 +219,20 @@ definitions:
       role:
         example: liaison
         type: string
+    type: object
+  models.SwaggerAdminUserRoleUpdateResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.AdminUserRoleUpdateResponse'
+      error:
+        example: ""
+        type: string
+      message:
+        example: User role updated successfully
+        type: string
+      success:
+        example: true
+        type: boolean
     type: object
   models.SwaggerChangePasswordResponse:
     properties:
@@ -433,14 +468,6 @@ definitions:
         example: Jane Doe
         maxLength: 50
         minLength: 2
-        type: string
-      role:
-        enum:
-        - admin
-        - liaison
-        - voice
-        - finance
-        example: user
         type: string
     type: object
   models.VerificationRequest:
@@ -992,6 +1019,59 @@ paths:
       security:
       - BearerAuth: []
       summary: Get user details
+      tags:
+      - Admin
+  /admin/users/{id}/role:
+    put:
+      consumes:
+      - application/json
+      description: Update a user's role (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AdminUserRoleUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerAdminUserRoleUpdateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user role
       tags:
       - Admin
   /admin/users/{id}/verify:
