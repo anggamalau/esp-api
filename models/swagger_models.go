@@ -138,3 +138,11 @@ type SwaggerChangePasswordResponse struct {
 	Data    ChangePasswordResponse `json:"data"`
 	Error   string                 `json:"error,omitempty" example:""`
 }
+
+// SwaggerAdminUserRoleUpdateResponse represents admin user role update response for Swagger documentation
+type SwaggerAdminUserRoleUpdateResponse struct {
+	Success bool                        `json:"success" example:"true"`
+	Message string                      `json:"message" example:"User role updated successfully"`
+	Data    AdminUserRoleUpdateResponse `json:"data"`
+	Error   string                      `json:"error,omitempty" example:""`
+}

@@ -128,3 +128,56 @@ func (h *AdminHandler) GetUserDetails(c *fiber.Ctx) error {
 
 	return utils.SuccessResponse(c, fiber.StatusOK, "User details retrieved successfully", user.ToResponse())
 }
+
+// UpdateUserRole godoc
+// @Summary      Update user role
+// @Description  Update a user's role (admin only)
+// @Tags         Admin
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      string                           true  "User ID"
+// @Param        request  body      models.AdminUserRoleUpdateRequest  true  "Role update data"
+// @Success      200      {object}  models.SwaggerAdminUserRoleUpdateResponse
+// @Failure      400      {object}  models.SwaggerErrorResponse
+// @Failure      401      {object}  models.SwaggerErrorResponse
+// @Failure      403      {object}  models.SwaggerErrorResponse
+// @Failure      404      {object}  models.SwaggerErrorResponse
+// @Failure      409      {object}  models.SwaggerErrorResponse
+// @Failure      500      {object}  models.SwaggerErrorResponse
+// @Router       /admin/users/{id}/role [put]
+func (h *AdminHandler) UpdateUserRole(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	if userID == "" {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "User ID is required")
+	}
+
+	var req models.AdminUserRoleUpdateRequest
+	if err := c.BodyParser(&req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	user, err := h.adminService.UpdateUserRole(ctx, userID, &req)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return utils.ValidationErrorResponse(c, err)
+		}
+		if err == utils.ErrUserNotFound {
+			return utils.ErrorResponse(c, fiber.StatusNotFound, "User not found")
+		}
+		if err == utils.ErrLastAdminDemotion {
+			return utils.ErrorResponse(c, fiber.StatusConflict, "Cannot demote the last admin user")
+		}
+		return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to update user role", err.Error())
+	}
+
+	response := models.AdminUserRoleUpdateResponse{
+		Message: "User role updated successfully",
+		User:    user.ToResponse(),
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "User role updated successfully", response)
+}

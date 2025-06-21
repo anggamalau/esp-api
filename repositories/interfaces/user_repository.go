@@ -15,4 +15,5 @@ type UserRepository interface {
 	VerifyUser(ctx context.Context, userID, adminID string, notes string) error
 	UpdatePassword(ctx context.Context, userID, hashedPassword string) error
 	UpdatePasswordResetInfo(ctx context.Context, userID string) error
+	CountUsersByRole(ctx context.Context, role string) (int64, error)
 }

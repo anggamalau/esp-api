@@ -231,3 +231,12 @@ func (r *userRepository) UpdatePasswordResetInfo(ctx context.Context, userID str
 
 	return nil
 }
+
+// CountUsersByRole counts the number of users with a specific role
+func (r *userRepository) CountUsersByRole(ctx context.Context, role string) (int64, error) {
+	count, err := r.collection.CountDocuments(ctx, bson.M{"role": role})
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

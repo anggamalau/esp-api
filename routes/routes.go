@@ -61,6 +61,7 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler, userHandler 
 	admin.Get("/users/pending", adminHandler.GetPendingUsers)
 	admin.Post("/users/:id/verify", adminHandler.VerifyUser)
 	admin.Get("/users/:id", adminHandler.GetUserDetails)
+	admin.Put("/users/:id/role", adminHandler.UpdateUserRole)
 
 	// Menu management routes (Admin only)
 	admin.Post("/menus", menuHandler.CreateMenu)

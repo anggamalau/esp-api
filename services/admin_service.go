@@ -56,3 +56,41 @@ func (s *AdminService) VerifyUser(ctx context.Context, userID, adminID string, r
 func (s *AdminService) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
 	return s.userRepo.GetByID(ctx, userID)
 }
+
+func (s *AdminService) UpdateUserRole(ctx context.Context, userID string, req *models.AdminUserRoleUpdateRequest) (*models.User, error) {
+	// Validate input
+	if err := utils.ValidateStruct(req); err != nil {
+		return nil, err
+	}
+
+	// Get existing user
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if role is actually changing
+	if user.Role == req.Role {
+		return user, nil
+	}
+
+	// Security check: Prevent demoting the last admin
+	if user.Role == "admin" && req.Role != "admin" {
+		adminCount, err := s.userRepo.CountUsersByRole(ctx, "admin")
+		if err != nil {
+			return nil, err
+		}
+		if adminCount <= 1 {
+			return nil, utils.ErrLastAdminDemotion
+		}
+	}
+
+	// Update role
+	user.Role = req.Role
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
