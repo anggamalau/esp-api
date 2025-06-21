@@ -1269,6 +1269,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/change-password": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change current user's password by providing current and new password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Change user password",
+                "parameters": [
+                    {
+                        "description": "Password change data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerChangePasswordResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/logout-all": {
             "post": {
                 "security": [
@@ -1523,6 +1586,38 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm_password",
+                "current_password",
+                "new_password"
+            ],
+            "properties": {
+                "confirm_password": {
+                    "type": "string",
+                    "example": "newpassword456"
+                },
+                "current_password": {
+                    "type": "string",
+                    "example": "oldpassword123"
+                },
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "newpassword456"
+                }
+            }
+        },
+        "models.ChangePasswordResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Your password has been updated successfully"
+                }
+            }
+        },
         "models.ForgotPasswordRequest": {
             "type": "object",
             "required": [
@@ -1764,6 +1859,26 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "example": "liaison"
+                }
+            }
+        },
+        "models.SwaggerChangePasswordResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.ChangePasswordResponse"
+                },
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Password changed successfully"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },

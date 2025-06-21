@@ -1,5 +1,28 @@
 basePath: /api/v1
 definitions:
+  models.ChangePasswordRequest:
+    properties:
+      confirm_password:
+        example: newpassword456
+        type: string
+      current_password:
+        example: oldpassword123
+        type: string
+      new_password:
+        example: newpassword456
+        minLength: 6
+        type: string
+    required:
+    - confirm_password
+    - current_password
+    - new_password
+    type: object
+  models.ChangePasswordResponse:
+    properties:
+      message:
+        example: Your password has been updated successfully
+        type: string
+    type: object
   models.ForgotPasswordRequest:
     properties:
       email:
@@ -175,6 +198,20 @@ definitions:
       role:
         example: liaison
         type: string
+    type: object
+  models.SwaggerChangePasswordResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.ChangePasswordResponse'
+      error:
+        example: ""
+        type: string
+      message:
+        example: Password changed successfully
+        type: string
+      success:
+        example: true
+        type: boolean
     type: object
   models.SwaggerErrorResponse:
     properties:
@@ -1209,6 +1246,46 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
+  /users/change-password:
+    put:
+      consumes:
+      - application/json
+      description: Change current user's password by providing current and new password
+      parameters:
+      - description: Password change data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerChangePasswordResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Change user password
+      tags:
+      - User
   /users/logout-all:
     post:
       consumes:
