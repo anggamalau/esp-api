@@ -52,17 +52,21 @@ func main() {
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository()
 	tokenRepo := repositories.NewTokenRepository()
+	permissionRepo := repositories.NewPermissionRepository()
+	menuRepo := repositories.NewMenuRepository(permissionRepo)
 
 	// Initialize services
 	emailService := services.NewEmailService()
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService(userRepo, tokenRepo, emailService)
 	adminService := services.NewAdminService(userRepo)
+	menuService := services.NewMenuService(menuRepo, permissionRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
 	adminHandler := handlers.NewAdminHandler(adminService)
+	menuHandler := handlers.NewMenuHandler(menuService)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
@@ -76,7 +80,7 @@ func main() {
 	})
 
 	// Setup routes
-	routes.SetupRoutes(app, authHandler, userHandler, adminHandler, userRepo)
+	routes.SetupRoutes(app, authHandler, userHandler, adminHandler, menuHandler, userRepo)
 
 	// Log Swagger status
 	logSwaggerStatus()

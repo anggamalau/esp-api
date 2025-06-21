@@ -21,6 +21,90 @@ definitions:
       user:
         $ref: '#/definitions/models.UserResponse'
     type: object
+  models.MenuCreateRequest:
+    properties:
+      description:
+        example: Main dashboard view
+        maxLength: 200
+        type: string
+      icon:
+        example: dashboard-icon
+        maxLength: 50
+        type: string
+      name:
+        example: Dashboard
+        maxLength: 50
+        minLength: 2
+        type: string
+      order:
+        example: 1
+        minimum: 0
+        type: integer
+      path:
+        example: /dashboard
+        maxLength: 100
+        type: string
+    required:
+    - name
+    - path
+    type: object
+  models.MenuResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      description:
+        example: Main dashboard view
+        type: string
+      icon:
+        example: dashboard-icon
+        type: string
+      id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Dashboard
+        type: string
+      order:
+        example: 1
+        type: integer
+      path:
+        example: /dashboard
+        type: string
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
+  models.MenuUpdateRequest:
+    properties:
+      description:
+        example: Main dashboard view
+        maxLength: 200
+        type: string
+      icon:
+        example: dashboard-icon
+        maxLength: 50
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Dashboard
+        maxLength: 50
+        minLength: 2
+        type: string
+      order:
+        example: 1
+        minimum: 0
+        type: integer
+      path:
+        example: /dashboard
+        maxLength: 100
+        type: string
+    type: object
   models.PendingUserResponse:
     properties:
       created_at:
@@ -54,6 +138,43 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/models.UserResponse'
+    type: object
+  models.RoleMenuPermissionResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      granted_by_id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      granted_by_name:
+        example: Admin User
+        type: string
+      id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      menu_id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      menu_name:
+        example: Dashboard
+        type: string
+      role:
+        example: liaison
+        type: string
+    type: object
+  models.RolePermissionSummary:
+    properties:
+      menu_count:
+        example: 3
+        type: integer
+      menus:
+        items:
+          $ref: '#/definitions/models.MenuResponse'
+        type: array
+      role:
+        example: liaison
+        type: string
     type: object
   models.SwaggerErrorResponse:
     properties:
@@ -215,6 +336,27 @@ definitions:
     - email
     - password
     type: object
+  models.UserMenuResponse:
+    properties:
+      description:
+        example: Main dashboard view
+        type: string
+      icon:
+        example: dashboard-icon
+        type: string
+      id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      name:
+        example: Dashboard
+        type: string
+      order:
+        example: 1
+        type: integer
+      path:
+        example: /dashboard
+        type: string
+    type: object
   models.UserResponse:
     properties:
       created_at:
@@ -286,6 +428,496 @@ info:
   title: Backend API
   version: "1.0"
 paths:
+  /admin/menus:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu items (Admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MenuResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all menus
+      tags:
+      - Menu Management
+    post:
+      consumes:
+      - application/json
+      description: Create a new menu item (Admin only)
+      parameters:
+      - description: Menu creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.MenuCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MenuResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new menu
+      tags:
+      - Menu Management
+  /admin/menus/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a menu item (Admin only)
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete menu
+      tags:
+      - Menu Management
+    get:
+      consumes:
+      - application/json
+      description: Get a specific menu by ID (Admin only)
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MenuResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get menu by ID
+      tags:
+      - Menu Management
+    put:
+      consumes:
+      - application/json
+      description: Update a menu item (Admin only)
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Menu update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.MenuUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MenuResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update menu
+      tags:
+      - Menu Management
+  /admin/menus/{id}/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles that have access to a specific menu (Admin only)
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.RoleMenuPermissionResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get roles by menu
+      tags:
+      - Permission Management
+  /admin/roles/{role}/menus:
+    get:
+      consumes:
+      - application/json
+      description: Get all menu permissions for a specific role (Admin only)
+      parameters:
+      - description: Role name
+        in: path
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.RoleMenuPermissionResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get permissions by role
+      tags:
+      - Permission Management
+  /admin/roles/{role}/menus/{menuId}:
+    delete:
+      consumes:
+      - application/json
+      description: Revoke access to a menu for a specific role (Admin only)
+      parameters:
+      - description: Role name
+        in: path
+        name: role
+        required: true
+        type: string
+      - description: Menu ID
+        in: path
+        name: menuId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Revoke menu permission from role
+      tags:
+      - Permission Management
+    post:
+      consumes:
+      - application/json
+      description: Grant access to a menu for a specific role (Admin only)
+      parameters:
+      - description: Role name
+        in: path
+        name: role
+        required: true
+        type: string
+      - description: Menu ID
+        in: path
+        name: menuId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Grant menu permission to role
+      tags:
+      - Permission Management
+  /admin/roles/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all role-menu permissions (Admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.RoleMenuPermissionResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all permissions
+      tags:
+      - Permission Management
+  /admin/roles/summary:
+    get:
+      consumes:
+      - application/json
+      description: Get summary of permissions for all roles (Admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.RolePermissionSummary'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get role permission summary
+      tags:
+      - Permission Management
   /admin/users/{id}:
     get:
       consumes:
@@ -602,6 +1234,38 @@ paths:
       summary: Logout from all devices
       tags:
       - Authentication
+  /users/menus:
+    get:
+      consumes:
+      - application/json
+      description: Get menus accessible by the current user based on their role
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SwaggerResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.UserMenuResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user accessible menus
+      tags:
+      - User Menu Access
   /users/profile:
     delete:
       consumes:

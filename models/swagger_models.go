@@ -80,3 +80,53 @@ type SwaggerForgotPasswordResponse struct {
 	Message string                 `json:"message" example:"Request processed successfully"`
 	Data    ForgotPasswordResponse `json:"data"`
 }
+
+// Menu-related Swagger models
+
+// SwaggerMenuResponse represents menu response for Swagger documentation
+type SwaggerMenuResponse struct {
+	Success bool         `json:"success" example:"true"`
+	Message string       `json:"message" example:"Menu retrieved successfully"`
+	Data    MenuResponse `json:"data"`
+	Error   string       `json:"error,omitempty" example:""`
+}
+
+// SwaggerMenuListResponse represents menu list response for Swagger documentation
+type SwaggerMenuListResponse struct {
+	Success bool           `json:"success" example:"true"`
+	Message string         `json:"message" example:"Menus retrieved successfully"`
+	Data    []MenuResponse `json:"data"`
+	Error   string         `json:"error,omitempty" example:""`
+}
+
+// SwaggerUserMenuResponse represents user menu response for Swagger documentation
+type SwaggerUserMenuResponse struct {
+	Success bool               `json:"success" example:"true"`
+	Message string             `json:"message" example:"User menus retrieved successfully"`
+	Data    []UserMenuResponse `json:"data"`
+	Error   string             `json:"error,omitempty" example:""`
+}
+
+// SwaggerPermissionResponse represents permission response for Swagger documentation
+type SwaggerPermissionResponse struct {
+	Success bool                       `json:"success" example:"true"`
+	Message string                     `json:"message" example:"Permission retrieved successfully"`
+	Data    RoleMenuPermissionResponse `json:"data"`
+	Error   string                     `json:"error,omitempty" example:""`
+}
+
+// SwaggerPermissionListResponse represents permission list response for Swagger documentation
+type SwaggerPermissionListResponse struct {
+	Success bool                         `json:"success" example:"true"`
+	Message string                       `json:"message" example:"Permissions retrieved successfully"`
+	Data    []RoleMenuPermissionResponse `json:"data"`
+	Error   string                       `json:"error,omitempty" example:""`
+}
+
+// SwaggerRolePermissionSummaryResponse represents role permission summary response for Swagger documentation
+type SwaggerRolePermissionSummaryResponse struct {
+	Success bool                    `json:"success" example:"true"`
+	Message string                  `json:"message" example:"Role summary retrieved successfully"`
+	Data    []RolePermissionSummary `json:"data"`
+	Error   string                  `json:"error,omitempty" example:""`
+}
