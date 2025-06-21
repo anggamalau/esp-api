@@ -20,6 +20,14 @@ var (
 	ErrUserNotEligibleForReset    = errors.New("user not eligible for password reset")
 	ErrPasswordResetLimitExceeded = errors.New("password reset limit exceeded")
 	ErrPasswordGenerationFailed   = errors.New("failed to generate secure password")
+
+	// Menu related errors
+	ErrMenuNotFound            = errors.New("menu not found")
+	ErrInvalidID               = errors.New("invalid id format")
+	ErrMenuAlreadyExists       = errors.New("menu already exists")
+	ErrPermissionNotFound      = errors.New("permission not found")
+	ErrPermissionAlreadyExists = errors.New("permission already exists")
+	ErrMenuAccessDenied        = errors.New("menu access denied")
 )
 
 func IsValidationError(err error) bool {

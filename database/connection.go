@@ -77,5 +77,69 @@ func createIndexes() {
 		log.Println("Warning: Failed to create TTL index:", err)
 	}
 
+	// Create indexes for menus collection
+	menuCollection := DB.Collection("menus")
+	menuNameIndex := mongo.IndexModel{
+		Keys:    map[string]interface{}{"name": 1},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err = menuCollection.Indexes().CreateOne(ctx, menuNameIndex)
+	if err != nil {
+		log.Println("Warning: Failed to create menu name index:", err)
+	}
+
+	menuPathIndex := mongo.IndexModel{
+		Keys:    map[string]interface{}{"path": 1},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err = menuCollection.Indexes().CreateOne(ctx, menuPathIndex)
+	if err != nil {
+		log.Println("Warning: Failed to create menu path index:", err)
+	}
+
+	menuOrderIndex := mongo.IndexModel{
+		Keys: map[string]interface{}{"order": 1},
+	}
+
+	_, err = menuCollection.Indexes().CreateOne(ctx, menuOrderIndex)
+	if err != nil {
+		log.Println("Warning: Failed to create menu order index:", err)
+	}
+
+	// Create indexes for role_menu_permissions collection
+	permissionCollection := DB.Collection("role_menu_permissions")
+	roleMenuIndex := mongo.IndexModel{
+		Keys:    map[string]interface{}{"role": 1, "menu_id": 1},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err = permissionCollection.Indexes().CreateOne(ctx, roleMenuIndex)
+	if err != nil {
+		log.Println("Warning: Failed to create role-menu permission index:", err)
+	}
+
+	roleIndex := mongo.IndexModel{
+		Keys: map[string]interface{}{"role": 1},
+	}
+
+	_, err = permissionCollection.Indexes().CreateOne(ctx, roleIndex)
+	if err != nil {
+		log.Println("Warning: Failed to create role index:", err)
+	}
+
+	menuIdIndex := mongo.IndexModel{
+		Keys: map[string]interface{}{"menu_id": 1},
+	}
+
+	_, err = permissionCollection.Indexes().CreateOne(ctx, menuIdIndex)
+	if err != nil {
+		log.Println("Warning: Failed to create menu_id index:", err)
+	}
+
 	log.Println("Database indexes created successfully")
+
+	// Seed initial data
+	SeedInitialData()
 }
