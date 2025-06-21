@@ -78,6 +78,16 @@ type ForgotPasswordResponse struct {
 	Message string `json:"message" example:"New password has been sent to your email address"`
 }
 
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required" example:"oldpassword123"`
+	NewPassword     string `json:"new_password" validate:"required,min=6" example:"newpassword456"`
+	ConfirmPassword string `json:"confirm_password" validate:"required" example:"newpassword456"`
+}
+
+type ChangePasswordResponse struct {
+	Message string `json:"message" example:"Your password has been updated successfully"`
+}
+
 func (u *User) ToResponse() UserResponse {
 	return UserResponse{
 		ID:                u.ID.Hex(),

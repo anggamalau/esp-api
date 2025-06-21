@@ -52,6 +52,7 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler, userHandler 
 	protected.Get("/profile", userHandler.GetProfile)
 	protected.Put("/profile", userHandler.UpdateProfile)
 	protected.Delete("/profile", userHandler.DeleteProfile)
+	protected.Put("/change-password", userHandler.ChangePassword)
 	protected.Post("/logout-all", authHandler.LogoutAll)
 	protected.Get("/menus", menuHandler.GetUserMenus)
 

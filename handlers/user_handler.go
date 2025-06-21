@@ -121,3 +121,52 @@ func (h *UserHandler) DeleteProfile(c *fiber.Ctx) error {
 
 	return utils.SuccessResponse(c, fiber.StatusOK, "Profile deleted successfully", nil)
 }
+
+// ChangePassword godoc
+// @Summary      Change user password
+// @Description  Change current user's password by providing current and new password
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      models.ChangePasswordRequest  true  "Password change data"
+// @Success      200      {object}  models.SwaggerChangePasswordResponse
+// @Failure      400      {object}  models.SwaggerErrorResponse
+// @Failure      401      {object}  models.SwaggerErrorResponse
+// @Failure      404      {object}  models.SwaggerErrorResponse
+// @Failure      500      {object}  models.SwaggerErrorResponse
+// @Router       /users/change-password [put]
+func (h *UserHandler) ChangePassword(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(string)
+
+	var req models.ChangePasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := h.userService.ChangePassword(ctx, userID, &req)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return utils.ValidationErrorResponse(c, err)
+		}
+		if err == utils.ErrInvalidCredentials {
+			return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Current password is incorrect")
+		}
+		if err == utils.ErrUserNotFound {
+			return utils.ErrorResponse(c, fiber.StatusNotFound, "User not found")
+		}
+		if err.Error() == "password confirmation does not match" || err.Error() == "new password must be different from current password" {
+			return utils.ErrorResponse(c, fiber.StatusBadRequest, err.Error())
+		}
+		return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to change password", err.Error())
+	}
+
+	response := models.ChangePasswordResponse{
+		Message: "Your password has been updated successfully",
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "Password changed successfully", response)
+}

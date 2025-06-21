@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"backend/models"
@@ -124,4 +125,46 @@ func (s *UserService) ValidateUserCredentials(ctx context.Context, email, passwo
 	}
 
 	return user, nil
+}
+
+func (s *UserService) ChangePassword(ctx context.Context, userID string, req *models.ChangePasswordRequest) error {
+	// Validate input
+	if err := utils.ValidateStruct(req); err != nil {
+		return err
+	}
+
+	// Check if new password matches confirm password
+	if req.NewPassword != req.ConfirmPassword {
+		return errors.New("password confirmation does not match")
+	}
+
+	// Get existing user
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	// Verify current password
+	if !utils.CheckPasswordHash(req.CurrentPassword, user.Password) {
+		return utils.ErrInvalidCredentials
+	}
+
+	// Check if new password is different from current password
+	if utils.CheckPasswordHash(req.NewPassword, user.Password) {
+		return errors.New("new password must be different from current password")
+	}
+
+	// Hash new password
+	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	// Update password in database
+	err = s.userRepo.UpdatePassword(ctx, userID, hashedPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

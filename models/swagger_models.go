@@ -130,3 +130,11 @@ type SwaggerRolePermissionSummaryResponse struct {
 	Data    []RolePermissionSummary `json:"data"`
 	Error   string                  `json:"error,omitempty" example:""`
 }
+
+// SwaggerChangePasswordResponse represents change password response for Swagger documentation
+type SwaggerChangePasswordResponse struct {
+	Success bool                   `json:"success" example:"true"`
+	Message string                 `json:"message" example:"Password changed successfully"`
+	Data    ChangePasswordResponse `json:"data"`
+	Error   string                 `json:"error,omitempty" example:""`
+}
